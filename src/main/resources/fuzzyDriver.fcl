@@ -1,30 +1,30 @@
 FUNCTION_BLOCK
 VAR_INPUT
-current_speed : REAL;
-distance_from_vehicle : REAL;
+speed : REAL;
+distance : REAL;
 slipperiness : REAL;
 END_VAR
 VAR_OUTPUT
 speed_change : REAL;
 END_VAR
-FUZZIFY current_speed
+FUZZIFY speed
 TERM none := (0, 1) (1, 0);
 TERM slow := (0, 0) (10, 1) (20, 1) (30, 0.70) (40, 0.50) (50, 0.20) (60, 0);
-TERM average := (30, 0) (40, 0.50) (50, 1) (60, 1) (70, 0.70) (80, 0.50) (90, 0);
+TERM normal := (30, 0) (40, 0.50) (50, 1) (60, 1) (70, 0.70) (80, 0.50) (90, 0);
 TERM fast := (70, 0) (80, 0.50) (90, 1) (100, 1) (110, 1) (120, 0.50) (130, 0);
 TERM very_fast := (110, 0) (120, 0.50) (130, 1) (140, 1) (150, 1);
 END_FUZZIFY
-FUZZIFY distance_from_vehicle
+FUZZIFY distance
 TERM super_close := (0,1) (1, 0);
 TERM very_close := (0, 0) (1, 0.5) (2, 1) (3, 0.50) (4, 0);
 TERM close := (1, 0) (2, 0.50) (3, 1) (4, 0.50) (5, 0);
-TERM average := (2, 0) (3, 0.20) (4, 0.70) (5, 1) (6, 0.50) (7, 0.20) (8, 0);
+TERM normal := (2, 0) (3, 0.20) (4, 0.70) (5, 1) (6, 0.50) (7, 0.20) (8, 0);
 TERM far := (4,0) (5, 0.20) (6, 0.50) (7, 1) (8, 1) (10, 1);
 END_FUZZIFY
 FUZZIFY slipperiness
-TERM none_or_light := (0, 1) (0.5, 1) (1, 1) (1.5, 1) (2, 0.70) (2.5, 0.50) (3, 0);
-TERM moderate := (2, 0) (2.5, 0.50) (3, 0.70) (3.5, 1) (4, 1) (4.5, 1) (5, 1) (5.5, 0.70) (6, 0.50) (6.5, 0.50) (7, 0);
-TERM heavy := (5.5, 0) (6, 0.50) (6.5, 0.70) (7, 1) (7.5, 1) (8, 1) (8.5, 1) (9, 1);
+TERM low := (0, 1) (0.5, 1) (1, 1) (1.5, 1) (2, 0.70) (2.5, 0.50) (3, 0);
+TERM average := (2, 0) (2.5, 0.50) (3, 0.70) (3.5, 1) (4, 1) (4.5, 1) (5, 1) (5.5, 0.70) (6, 0.50) (6.5, 0.50) (7, 0);
+TERM high := (5.5, 0) (6, 0.50) (6.5, 0.70) (7, 1) (7.5, 1) (8, 1) (8.5, 1) (9, 1);
 END_FUZZIFY
 DEFUZZIFY speed_change
 TERM brake_quick := (-8, 1) (-7, 1) (-6, 0.70) (-5, 0.50) (-4, 0);
@@ -37,31 +37,31 @@ END_DEFUZZIFY
 RULEBLOCK first
 ACT: MIN;
 
-RULE 0: IF distance_from_vehicle IS super_close AND current_speed IS NOT none THEN speed_change IS brake_quick;
-RULE 1: IF (distance_from_vehicle IS super_close OR distance_from_vehicle IS very_close) AND current_speed IS none THEN speed_change IS no_change;
-RULE 2: IF (distance_from_vehicle IS NOT super_close AND distance_from_vehicle IS NOT very_close) AND current_speed IS none THEN speed_change IS speed_up;
+RULE 0: IF distance IS super_close AND speed IS NOT none THEN speed_change IS brake_quick;
+RULE 1: IF (distance IS super_close OR distance IS very_close) AND speed IS none THEN speed_change IS no_change;
+RULE 2: IF (distance IS NOT super_close AND distance IS NOT very_close) AND speed IS none THEN speed_change IS speed_up;
 
-RULE 3: IF distance_from_vehicle IS very_close AND current_speed IS slow THEN speed_change IS no_change;
-RULE 4: IF distance_from_vehicle IS very_close AND current_speed IS average THEN speed_change IS brake;
-RULE 5: IF distance_from_vehicle IS very_close AND (current_speed IS fast OR current_speed IS very_fast) THEN speed_change IS brake_quick;
+RULE 3: IF distance IS very_close AND speed IS slow THEN speed_change IS no_change;
+RULE 4: IF distance IS very_close AND speed IS normal THEN speed_change IS brake;
+RULE 5: IF distance IS very_close AND (speed IS fast OR speed IS very_fast) THEN speed_change IS brake_quick;
 
-RULE 6: IF distance_from_vehicle IS close AND current_speed IS slow THEN speed_change IS no_change;
-RULE 7: IF distance_from_vehicle IS close AND current_speed IS average AND slipperiness IS none_or_light THEN speed_change IS no_change;
-RULE 8: IF distance_from_vehicle IS close AND (current_speed IS average OR current_speed IS fast) AND slipperiness IS moderate THEN speed_change IS brake;
-RULE 9: IF distance_from_vehicle IS close AND (current_speed IS average OR current_speed IS fast OR current_speed IS very_fast) AND slipperiness IS heavy THEN speed_change IS brake_quick;
-RULE 10: IF distance_from_vehicle IS close AND (current_speed IS fast OR current_speed IS very_fast) AND slipperiness IS none_or_light THEN speed_change IS brake;
-RULE 11: IF distance_from_vehicle IS close AND current_speed IS very_fast AND slipperiness IS moderate THEN speed_change IS brake_quick;
+RULE 6: IF distance IS close AND speed IS slow THEN speed_change IS no_change;
+RULE 7: IF distance IS close AND speed IS normal AND slipperiness IS low THEN speed_change IS no_change;
+RULE 8: IF distance IS close AND (speed IS normal OR speed IS fast) AND slipperiness IS average THEN speed_change IS brake;
+RULE 9: IF distance IS close AND (speed IS normal OR speed IS fast OR speed IS very_fast) AND slipperiness IS high THEN speed_change IS brake_quick;
+RULE 10: IF distance IS close AND (speed IS fast OR speed IS very_fast) AND slipperiness IS low THEN speed_change IS brake;
+RULE 11: IF distance IS close AND speed IS very_fast AND slipperiness IS average THEN speed_change IS brake_quick;
 
-RULE 12: IF distance_from_vehicle IS average AND (current_speed IS slow OR current_speed IS average) AND slipperiness IS none_or_light THEN speed_change IS speed_up;
-RULE 13: IF distance_from_vehicle IS average AND (current_speed IS slow OR current_speed IS average) AND (slipperiness IS moderate OR slipperiness IS heavy) THEN speed_change IS no_change;
-RULE 14: IF distance_from_vehicle IS average AND current_speed IS fast AND (slipperiness IS moderate OR slipperiness IS none_or_light) THEN speed_change IS no_change;
-RULE 15: IF distance_from_vehicle IS average AND current_speed IS fast AND slipperiness IS heavy THEN speed_change IS brake;
-RULE 16: IF distance_from_vehicle IS average AND current_speed IS very_fast THEN speed_change IS brake;
+RULE 12: IF distance IS normal AND (speed IS slow OR speed IS normal) AND slipperiness IS low THEN speed_change IS speed_up;
+RULE 13: IF distance IS normal AND (speed IS slow OR speed IS normal) AND (slipperiness IS average OR slipperiness IS high) THEN speed_change IS no_change;
+RULE 14: IF distance IS normal AND speed IS fast AND (slipperiness IS average OR slipperiness IS low) THEN speed_change IS no_change;
+RULE 15: IF distance IS normal AND speed IS fast AND slipperiness IS high THEN speed_change IS brake;
+RULE 16: IF distance IS normal AND speed IS very_fast THEN speed_change IS brake;
 
-RULE 17: IF distance_from_vehicle IS far AND (current_speed IS slow OR current_speed IS average) THEN speed_change IS speed_up;
-RULE 18: IF distance_from_vehicle IS far AND current_speed IS fast AND (slipperiness IS moderate OR slipperiness IS none_or_light) THEN speed_change IS speed_up;
-RULE 19: IF distance_from_vehicle IS far AND current_speed IS fast AND slipperiness IS heavy THEN speed_change IS no_change;
-RULE 20: IF distance_from_vehicle IS far AND current_speed IS very_fast THEN speed_change IS speed_up;
+RULE 17: IF distance IS far AND (speed IS slow OR speed IS normal) THEN speed_change IS speed_up;
+RULE 18: IF distance IS far AND speed IS fast AND (slipperiness IS average OR slipperiness IS low) THEN speed_change IS speed_up;
+RULE 19: IF distance IS far AND speed IS fast AND slipperiness IS high THEN speed_change IS no_change;
+RULE 20: IF distance IS far AND speed IS very_fast THEN speed_change IS speed_up;
 
 END_RULEBLOCK
 END_FUNCTION_BLOCK

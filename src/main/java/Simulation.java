@@ -8,14 +8,15 @@ public class Simulation {
     private double slipperiness;
     private final Car userCar;
     private final Car aiCar;
-    private final View view;
+    private final double maxSlipperiness;
 
     public Simulation(String fuzzyDriverPath, Stage primaryStage) throws FileNotFoundException {
         this.fuzzyDriverController = new FuzzyDriverController(fuzzyDriverPath);
-        this.slipperiness = 0.5d;
-        this.userCar = new Car(8);
-        this.aiCar = new Car(0);
-        this.view = new View(this, primaryStage);
+        this.slipperiness = 1.0d;
+        this.maxSlipperiness = 10.0d;
+        this.userCar = new Car(8, 80, 300);
+        this.aiCar = new Car(0, 60, 300);
+        View view = new View(this, primaryStage);
     }
 
     public void simulate(int TIME_DIFF_MILLISECONDS){
@@ -33,12 +34,14 @@ public class Simulation {
 
     public double getSlipperiness() { return this.slipperiness; }
 
-    public void setSlipperiness(double slipperiness) { this.slipperiness = slipperiness; }
+    public void setSlipperiness(double slipperiness) {
+        if(slipperiness>=0 && slipperiness<=maxSlipperiness)
+        this.slipperiness = slipperiness;
+    }
 
     public double getCarDistance(){
-        double distance = this.userCar.getDistanceFromStart() - this.aiCar.getDistanceFromStart()
+        return this.userCar.getDistanceFromStart() - this.aiCar.getDistanceFromStart()
                 - this.userCar.getLength()/2.0d - this.aiCar.getLength()/2.0d;
-        return distance;
     }
 
     public int getUserCarSpeed() {
@@ -50,11 +53,11 @@ public class Simulation {
     }
 
     public void decreaseSlipperiness(double difference){
-        this.slipperiness -= difference;
+        setSlipperiness(this.slipperiness - difference);
     }
 
     public void increaseSlipperiness(double difference){
-        this.slipperiness += difference;
+        setSlipperiness(this.slipperiness + difference);
     }
 
     public void decreaseUserCarSpeed(int difference){
