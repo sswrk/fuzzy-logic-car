@@ -14,8 +14,8 @@ public class Simulation {
         this.fuzzyDriverController = new FuzzyDriverController(fuzzyDriverPath);
         this.slipperiness = 1.0d;
         this.maxSlipperiness = 10.0d;
-        this.userCar = new Car(8, 80, 300);
-        this.aiCar = new Car(0, 60, 300);
+        this.userCar = new Car(8, 80, 150);
+        this.aiCar = new Car(0, 60, 150);
         View view = new View(this, primaryStage);
     }
 
